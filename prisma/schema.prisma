@@ -1,0 +1,110 @@
+// Prisma schema for InRide Car Rental Platform
+// This schema defines the database structure for the application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// User roles: CLIENT or AGENCY
+enum Role {
+  CLIENT
+  AGENCY
+}
+
+// Request status: OPEN, NEGOTIATING, BOOKED, COMPLETED, CANCELLED, EXPIRED
+enum RequestStatus {
+  OPEN
+  NEGOTIATING
+  BOOKED
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+// Offer status: PENDING, NEGOTIATING, ACCEPTED, REJECTED
+enum OfferStatus {
+  PENDING
+  NEGOTIATING
+  ACCEPTED
+  REJECTED
+}
+
+// User model - stores both clients and agencies
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  password     String
+  role         Role     @default(CLIENT)
+  firstName    String
+  lastName     String
+  phone        String
+  nationality  String
+  avatarUrl    String?
+  companyName  String?  // For agencies
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  clientRequests  Request[] @relation("ClientRequests")
+  agencyOffers    Offer[]   @relation("AgencyOffers")
+  sentMessages    Message[] @relation("SentMessages")
+}
+
+// Request model - client's car rental request
+model Request {
+  id             String        @id @default(uuid())
+  clientId       String
+  pickupLocation String
+  dropoffLocation String
+  pickupDate     DateTime
+  dropoffDate    DateTime
+  carType        String
+  budget         Float
+  additionalNotes String?
+  status         RequestStatus @default(OPEN)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  client   User    @relation("ClientRequests", fields: [clientId], references: [id])
+  offers   Offer[]
+}
+
+// Offer model - agency's response to a client request
+model Offer {
+  id          String       @id @default(uuid())
+  requestId   String
+  agencyId    String
+  carModel    String
+  carType     String
+  carImageUrl String?
+  dailyRate   Float
+  finalRate   Float?
+  status      OfferStatus  @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  request  Request   @relation(fields: [requestId], references: [id])
+  agency   User      @relation("AgencyOffers", fields: [agencyId], references: [id])
+  messages Message[]
+}
+
+// Message model - chat messages between client and agency
+model Message {
+  id              String   @id @default(uuid())
+  offerId         String
+  senderId        String
+  content         String
+  isPriceProposal Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  // Relations
+  offer  Offer @relation(fields: [offerId], references: [id])
+  sender User  @relation("SentMessages", fields: [senderId], references: [id])
+}
