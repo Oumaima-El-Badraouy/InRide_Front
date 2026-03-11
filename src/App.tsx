@@ -18,8 +18,16 @@ import {
   Clock,
   Shield,
   Zap,
-  ChevronRight
+  ChevronRight,
+  Route as RouteIcon
 } from 'lucide-react';
+
+import ServicesPage from './pages/ServicesPage';
+import AboutPage from './pages/AboutPage';
+import TeamPage from './pages/TeamPage';
+
+// shared data
+import { services } from './lib/services';
 
 // Types
 interface Request {
@@ -319,18 +327,16 @@ function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
-              <Car className="w-6 h-6 text-white" />
-            </div>
+          <Link to="/" className="flex items-center space-x-0">
+            <RouteIcon  className="w-6 h-6 text-black" />
             <span className="text-xl font-bold text-slate-900">InRide</span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-slate-600 hover:text-sky-600 transition-colors">Home</Link>
-            <Link to="/#services" className="text-slate-600 hover:text-sky-600 transition-colors">Services</Link>
-            <Link to="/#about" className="text-slate-600 hover:text-sky-600 transition-colors">About</Link>
-            <Link to="/#team" className="text-slate-600 hover:text-sky-600 transition-colors">Team</Link>
+            <Link to="/" className="text-slate-600 hover:text-amber-600 transition-colors">Home</Link>
+            <Link to="/services" className="text-slate-600 hover:text-amber-600 transition-colors">Services</Link>
+            <Link to="/about" className="text-slate-600 hover:text-amber-600 transition-colors">About</Link>
+            <Link to="/team" className="text-slate-600 hover:text-amber-600 transition-colors">Team</Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -340,19 +346,19 @@ function Header() {
                 <NotificationBell userId={user.id} userRole={user.role} />
                 <Link
                   to={user.role === 'CLIENT' ? '/dashboard' : '/agency'}
-                  className="text-slate-600 hover:text-sky-600 transition-colors"
+                  className="text-slate-600 hover:text-amber-600 transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   to="/profile"
-                  className="text-slate-600 hover:text-sky-600 transition-colors"
+                  className="text-slate-600 hover:text-amber-600 transition-colors"
                 >
                   Profile
                 </Link>
                 <button
                   onClick={logout}
-                  className="flex items-center space-x-2 px-4 py-2 text-slate-600 hover:text-sky-600 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 text-slate-600 hover:text-amber-600 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Logout</span>
@@ -362,13 +368,13 @@ function Header() {
               <>
                 <Link
                   to="/auth/signin"
-                  className="text-slate-600 hover:text-sky-600 transition-colors font-medium"
+                  className="text-slate-600 hover:text-amber-600 transition-colors font-medium"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/auth/signup"
-                  className="px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-medium transition-colors"
+                  className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors"
                 >
                   Sign Up
                 </Link>
@@ -388,9 +394,9 @@ function Header() {
           <div className="md:hidden py-4 border-t border-slate-200">
             <nav className="flex flex-col space-y-4">
               <Link to="/" className="text-slate-600">Home</Link>
-              <Link to="/#services" className="text-slate-600">Services</Link>
-              <Link to="/#about" className="text-slate-600">About</Link>
-              <Link to="/#team" className="text-slate-600">Team</Link>
+              <Link to="/services" className="text-slate-600">Services</Link>
+              <Link to="/about" className="text-slate-600">About</Link>
+              <Link to="/team" className="text-slate-600">Team</Link>
               {user ? (
                 <>
                   <Link to={user.role === 'CLIENT' ? '/dashboard' : '/agency'} className="text-slate-600">
@@ -404,7 +410,7 @@ function Header() {
               ) : (
                 <>
                   <Link to="/auth/signin" className="text-slate-600">Sign In</Link>
-                  <Link to="/auth/signup" className="text-sky-600 font-medium">Sign Up</Link>
+                  <Link to="/auth/signup" className="text-amber-600 font-medium">Sign Up</Link>
                 </>
               )}
             </nav>
@@ -415,16 +421,14 @@ function Header() {
   );
 }
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="bg-slate-900 text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div>
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
-                <Car className="w-6 h-6 text-white" />
-              </div>
+            <div className="flex items-center">
+              <RouteIcon  className="w-5 h-4 text-white" />
               <span className="text-xl font-bold">InRide</span>
             </div>
             <p className="text-slate-400">
@@ -435,10 +439,10 @@ function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-slate-400">
-              <li><Link to="/" className="hover:text-sky-400 transition-colors">Home</Link></li>
-              <li><Link to="/#services" className="hover:text-sky-400 transition-colors">Services</Link></li>
-              <li><Link to="/#about" className="hover:text-sky-400 transition-colors">About Us</Link></li>
-              <li><Link to="/#team" className="hover:text-sky-400 transition-colors">Team</Link></li>
+              <li><Link to="/" className="hover:text-amber-400 transition-colors">Home</Link></li>
+              <li><Link to="/services" className="hover:text-amber-400 transition-colors">Services</Link></li>
+              <li><Link to="/about" className="hover:text-amber-400 transition-colors">About</Link></li>
+              <li><Link to="/team" className="hover:text-amber-400 transition-colors">Team</Link></li>
             </ul>
           </div>
 
@@ -475,70 +479,23 @@ function Footer() {
 function HomePage() {
   const { user } = useAuth();
 
-  const services = [
-    {
-      icon: <Car className="w-8 h-8" />,
-      title: 'Wide Fleet Selection',
-      description: 'Choose from sedans, SUVs, trucks, and luxury vehicles from trusted agencies.',
-    },
-    {
-      icon: <DollarSign className="w-8 h-8" />,
-      title: 'Best Price Guarantee',
-      description: 'Negotiate directly with agencies to get the best deals on your rental.',
-    },
-    {
-      icon: <Shield className="w-8 h-8" />,
-      title: 'Secure Booking',
-      description: 'Your payments and personal information are protected with enterprise-grade security.',
-    },
-    {
-      icon: <Clock className="w-8 h-8" />,
-      title: '24/7 Support',
-      description: 'Round-the-clock customer support to assist you at any time.',
-    },
-  ];
 
-  const team = [
-    {
-      name: 'Sarah Johnson',
-      role: 'CEO & Founder',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop',
-    },
-    {
-      name: 'Michael Chen',
-      role: 'CTO',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop',
-    },
-    {
-      name: 'Emily Davis',
-      role: 'Head of Operations',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop',
-    },
-    {
-      name: 'James Wilson',
-      role: 'Head of Partnerships',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop',
-    },
-  ];
+
+
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-sky-100"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-amber-100"></div>
         <div className="absolute inset-0" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230ea5e9' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}></div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-sky-100 text-sky-700 rounded-full text-sm font-medium mb-8">
-            <Zap className="w-4 h-4 mr-2" />
-            Your Trusted Car Rental Platform
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-tight">
+<div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col justify-end mt-20 h-full pb-12">
+          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-10 mt-20 leading-tight">
             Rent a Car with
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-emerald-500"> Confidence</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-emerald-500"> Confidence</span>
           </h1>
 
           <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
@@ -548,192 +505,51 @@ function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to={user ? (user.role === 'CLIENT' ? '/dashboard' : '/agency') : '/auth/signup'}
-              className="px-8 py-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl flex items-center"
+              className="px-8 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl flex items-center"
             >
               {user ? 'Go to Dashboard' : 'Get Started'}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>
             <Link
-              to="/#services"
+              to="/services"
               className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-semibold text-lg transition-all border border-slate-200"
             >
               Learn More
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 mt-20 max-w-3xl mx-auto">
-            <div>
-              <div className="text-4xl font-bold text-sky-600">10K+</div>
-              <div className="text-slate-600">Happy Customers</div>
+          {/* Services section */}
+          <section className="pt-20 pb-32 bg-slate-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl font-bold text-slate-900 mb-4">Our Services</h2>
+                <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+                  We provide comprehensive car rental solutions tailored to your needs.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {services.map((service, idx) => (
+                  <div
+                    key={idx}
+                    className="p-8 bg-white rounded-2xl border border-slate-100 hover:border-amber-200 hover:shadow-xl transition-all group"
+                  >
+                    <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                      {service.icon}
+                    </div>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                      {service.title}
+                    </h3>
+                    <p className="text-slate-600">{service.description}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div>
-              <div className="text-4xl font-bold text-sky-600">500+</div>
-              <div className="text-slate-600">Car Agencies</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-sky-600">50K+</div>
-              <div className="text-slate-600">Rentals Completed</div>
-            </div>
-          </div>
+          </section>
         </div>
 
         {/* Decorative Elements */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-sky-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Our Services</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              We provide comprehensive car rental solutions tailored to your needs
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {services.map((service, index) => (
-              <div
-                key={index}
-                className="p-8 bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100 hover:border-sky-200 hover:shadow-xl transition-all group"
-              >
-                <div className="w-14 h-14 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center mb-6 group-hover:bg-sky-500 group-hover:text-white transition-colors">
-                  {service.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">{service.title}</h3>
-                <p className="text-slate-600">{service.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">How It Works</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Renting a car has never been easier - follow these simple steps
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: '01', title: 'Create Request', description: 'Fill out a form with your car preferences, dates, and budget.' },
-              { step: '02', title: 'Receive Offers', description: 'Get competitive offers from multiple agencies in your area.' },
-              { step: '03', title: 'Negotiate & Book', description: 'Chat with agencies, negotiate the best price, and confirm your booking.' },
-            ].map((item, index) => (
-              <div key={index} className="relative">
-                <div className="text-8xl font-bold text-sky-100 absolute -top-4 -left-4">{item.step}</div>
-                <div className="relative bg-white p-8 rounded-2xl border border-slate-100 shadow-lg">
-                  <h3 className="text-xl font-semibold text-slate-900 mb-3">{item.title}</h3>
-                  <p className="text-slate-600">{item.description}</p>
-                </div>
-                {index < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <ChevronRight className="w-8 h-8 text-sky-300" />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section id="about" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl font-bold text-slate-900 mb-6">
-                About InRide
-              </h2>
-              <p className="text-lg text-slate-600 mb-6">
-                InRide is revolutionizing the car rental industry by connecting customers directly with rental agencies.
-                Our platform enables transparent negotiation, ensuring both parties get the best deal.
-              </p>
-              <p className="text-lg text-slate-600 mb-8">
-                Founded in 2024, we aim to make car rental accessible, affordable, and hassle-free for everyone.
-                With thousands of vehicles and hundreds of partner agencies, we're your one-stop solution for all rental needs.
-              </p>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="w-6 h-6 text-emerald-500" />
-                  <span className="font-medium text-slate-700">Verified Agencies</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="w-6 h-6 text-emerald-500" />
-                  <span className="font-medium text-slate-700">Instant Booking</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="w-6 h-6 text-emerald-500" />
-                  <span className="font-medium text-slate-700">Best Prices</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <CheckCircle className="w-6 h-6 text-emerald-500" />
-                  <span className="font-medium text-slate-700">24/7 Support</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="aspect-square rounded-3xl overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&h=800&fit=crop"
-                  alt="Car rental"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl">
-                <div className="flex items-center space-x-4">
-                  <div className="text-3xl font-bold text-sky-600">4.9</div>
-                  <div>
-                    <div className="flex text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-current" />
-                      ))}
-                    </div>
-                    <div className="text-slate-600 text-sm">Customer Rating</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section id="team" className="py-24 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Meet Our Team</h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              The dedicated people behind InRide who work tirelessly to improve your rental experience
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {team.map((member, index) => (
-              <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-                <div className="aspect-square">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-slate-900">{member.name}</h3>
-                  <p className="text-slate-600">{member.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </section>
 
       <Footer />
@@ -765,72 +581,59 @@ function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-sky-100 py-12 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
-              <Car className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-slate-900">InRide</span>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <Header />
+      <div className="w-full max-w-md">
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-flex items-center space-x-2 mb-4">
+            <RouteIcon className="w-6 h-6 text-black" />
+            <span className="text-xl font-bold text-slate-900">InRide</span>
           </Link>
-          <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
-          <p className="text-slate-600 mt-2">Sign in to your account to continue</p>
+          <h2 className="text-2xl font-bold text-slate-900">Welcome Back</h2>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>
+              <div className="p-3 bg-red-50 text-red-600 rounded text-sm">{error}</div>
             )}
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                placeholder="Enter your email"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                placeholder="you@example.com"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                placeholder="Enter your password"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                placeholder="********"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-semibold transition-colors"
+              className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors"
             >
               Sign In
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-slate-600">
-              Don't have an account?{' '}
-              <Link to="/auth/signup" className="text-sky-600 hover:text-sky-700 font-medium">
-                Sign Up
-              </Link>
-            </p>
-          </div>
-
-          <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-            <p className="text-xs text-slate-500 text-center">
-              Demo accounts:<br />
-              Client: client@example.com / password123<br />
-              Agency: elite@example.com / password123
-            </p>
+          <div className="mt-4 text-center text-sm text-slate-600">
+            Don't have an account?{' '}
+            <Link to="/auth/signup" className="text-amber-600 hover:text-amber-700 font-medium">
+              Sign Up
+            </Link>
           </div>
         </div>
       </div>
@@ -876,81 +679,74 @@ function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-white to-sky-100 py-12 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
-              <Car className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-slate-900">InRide</span>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+      <Header />
+      <div className="w-full max-w-[600px]">
+        <div className="text-center mb-4">
+          <Link to="/" className="inline-flex items-center space-x-2 mb-2 mt-20">
+            <RouteIcon className="w-6 h-6 text-black" />
+            <span className="text-xl font-bold text-slate-900">InRide</span>
           </Link>
-          <h2 className="text-3xl font-bold text-slate-900">Create Account</h2>
-          <p className="text-slate-600 mt-2">Join InRide today</p>
+          <h2 className="text-2xl font-bold text-slate-900">Create Account</h2>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
           {/* Role Selection */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-3">I want to:</label>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">I want to:</label>
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setRole('CLIENT')}
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-3 rounded-xl border-2 transition-all ${
                   role === 'CLIENT'
-                    ? 'border-sky-500 bg-sky-50 text-sky-700'
+                    ? 'border-amber-500 bg-amber-50 text-amber-700'
                     : 'border-slate-200 hover:border-slate-300'
                 }`}
               >
-                <Users className="w-6 h-6 mx-auto mb-2" />
-                <div className="font-medium">Rent a Car</div>
-                <div className="text-xs text-slate-500">I'm a customer</div>
+                <Users className="w-5 h-5 mx-auto mb-1" />
+                <div className="font-medium text-sm">Rent a Car</div>
               </button>
               <button
                 type="button"
                 onClick={() => setRole('AGENCY')}
-                className={`p-4 rounded-xl border-2 transition-all ${
+                className={`p-3 rounded-xl border-2 transition-all ${
                   role === 'AGENCY'
-                    ? 'border-sky-500 bg-sky-50 text-sky-700'
+                    ? 'border-amber-500 bg-amber-50 text-amber-700'
                     : 'border-slate-200 hover:border-slate-300'
                 }`}
               >
-                <Car className="w-6 h-6 mx-auto mb-2" />
-                <div className="font-medium">List Cars</div>
-                <div className="text-xs text-slate-500">I'm an agency</div>
+                <RouteIcon className="w-5 h-5 mx-auto mb-1" />
+                <div className="font-medium text-sm">List Cars</div>
               </button>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>
+              <div className="p-2 bg-red-50 text-red-600 rounded text-sm">{error}</div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
-                <input
-                  type="text"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
-                <input
-                  type="text"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                  required
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
+              <input
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                required
+              />
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
+              <input
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                required
+              />
+            </div>
             {role === 'AGENCY' && (
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
@@ -958,71 +754,64 @@ function SignUpPage() {
                   type="text"
                   value={formData.companyName}
                   onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   required
                 />
               </div>
             )}
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
               <input
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 required
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Nationality</label>
               <input
                 type="text"
                 value={formData.nationality}
                 onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 required
               />
             </div>
-
             <button
               type="submit"
-              className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-semibold transition-colors"
+              className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors"
             >
               Create Account
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-slate-600">
-              Already have an account?{' '}
-              <Link to="/auth/signin" className="text-sky-600 hover:text-sky-700 font-medium">
-                Sign In
-              </Link>
-            </p>
+          <div className="mt-3 text-center text-sm text-slate-600">
+            Already have an account?{' '}
+            <Link to="/auth/signin" className="text-amber-600 hover:text-amber-700 font-medium">
+              Sign In
+            </Link>
           </div>
         </div>
       </div>
@@ -1031,10 +820,14 @@ function SignUpPage() {
 }
 
 // Client Dashboard
+// Client Dashboard with Google Maps Style
 function ClientDashboard() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<Request[]>([]);
   const [showNewRequest, setShowNewRequest] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [showOffers, setShowOffers] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [formData, setFormData] = useState({
     pickupLocation: '',
     dropoffLocation: '',
@@ -1077,245 +870,417 @@ function ClientDashboard() {
       budget: '',
       additionalNotes: '',
     });
+    setSelectedRequest(newRequest);
+    setShowOffers(true);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'OPEN': return 'bg-emerald-100 text-emerald-700';
-      case 'NEGOTIATING': return 'bg-amber-100 text-amber-700';
-      case 'BOOKED': return 'bg-sky-100 text-sky-700';
-      case 'COMPLETED': return 'bg-slate-100 text-slate-700';
-      default: return 'bg-slate-100 text-slate-700';
+      case 'OPEN': return 'bg-green-500';
+      case 'NEGOTIATING': return 'bg-yellow-500';
+      case 'BOOKED': return 'bg-blue-500';
+      case 'COMPLETED': return 'bg-gray-500';
+      default: return 'bg-gray-500';
     }
   };
 
   const activeRequests = requests.filter(r => r.status !== 'COMPLETED' && r.status !== 'CANCELLED').length;
-  const negotiatingRequests = requests.filter(r => r.status === 'NEGOTIATING').length;
+
+  // Mock locations for map markers (in real app, these would be geocoded)
+  const locations = requests.map((request, index) => ({
+    id: request.id,
+    name: request.pickupLocation,
+    lat: 40.7128 + (index * 0.01), // Mock coordinates
+    lng: -74.0060 + (index * 0.01),
+    status: request.status,
+    budget: request.budget,
+    carType: request.carType,
+  }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="pt-20 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900">
-              Welcome back, {user?.firstName}!
-            </h1>
-            <p className="text-slate-600 mt-1">Manage your car rental requests</p>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-600">Active Requests</p>
-                  <p className="text-3xl font-bold text-slate-900">{activeRequests}</p>
-                </div>
-                <div className="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center">
-                  <Car className="w-6 h-6" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-600">Negotiations</p>
-                  <p className="text-3xl font-bold text-slate-900">{negotiatingRequests}</p>
-                </div>
-                <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
-                  <MessageSquare className="w-6 h-6" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-slate-600">Completed</p>
-                  <p className="text-3xl font-bold text-slate-900">
-                    {requests.filter(r => r.status === 'COMPLETED').length}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* New Request Button */}
-          <div className="mb-6">
-            <button
-              onClick={() => setShowNewRequest(!showNewRequest)}
-              className="px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold transition-colors flex items-center"
-            >
-              {showNewRequest ? 'Cancel' : 'New Request'}
-              {!showNewRequest && <Car className="w-5 h-5 ml-2" />}
-            </button>
-          </div>
-
-          {/* New Request Form */}
-          {showNewRequest && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
-              <h2 className="text-xl font-semibold text-slate-900 mb-6">Create New Request</h2>
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Pickup Location</label>
-                  <input
-                    type="text"
-                    value={formData.pickupLocation}
-                    onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    placeholder="City, Airport, or Address"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Drop-off Location</label>
-                  <input
-                    type="text"
-                    value={formData.dropoffLocation}
-                    onChange={(e) => setFormData({ ...formData, dropoffLocation: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    placeholder="City, Airport, or Address"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Pickup Date</label>
-                  <input
-                    type="datetime-local"
-                    value={formData.pickupDate}
-                    onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Drop-off Date</label>
-                  <input
-                    type="datetime-local"
-                    value={formData.dropoffDate}
-                    onChange={(e) => setFormData({ ...formData, dropoffDate: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Car Type</label>
-                  <select
-                    value={formData.carType}
-                    onChange={(e) => setFormData({ ...formData, carType: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+    <div className="h-screen flex flex-col pt-16">
+      {/* Main Container */}
+      <div className="flex-1 flex relative">
+        {/* Sidebar */}
+        <div 
+          className={`absolute lg:relative z-20 h-full bg-white shadow-xl transition-all duration-300 ${
+            sidebarOpen ? 'w-96' : 'w-0 lg:w-20'
+          } overflow-hidden`}
+        >
+          <div className="h-full flex flex-col">
+            {/* Sidebar Header */}
+            <div className="p-4 border-b flex items-center justify-between">
+              {sidebarOpen ? (
+                <>
+                  <h2 className="font-semibold text-lg">My Requests</h2>
+                  <button 
+                    onClick={() => setSidebarOpen(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg"
                   >
-                    <option value="Sedan">Sedan</option>
-                    <option value="SUV">SUV</option>
-                    <option value="Truck">Truck</option>
-                    <option value="Van">Van</option>
-                    <option value="Sports Car">Sports Car</option>
-                    <option value="Luxury">Luxury</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Budget (per day)</label>
-                  <input
-                    type="number"
-                    value={formData.budget}
-                    onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    placeholder="Enter amount"
-                    required
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Additional Notes</label>
-                  <textarea
-                    value={formData.additionalNotes}
-                    onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                    rows={3}
-                    placeholder="Any special requirements or preferences..."
-                  />
-                </div>
-                <div className="md:col-span-2">
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => setSidebarOpen(true)}
+                  className="p-2 hover:bg-gray-100 rounded-lg mx-auto"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+
+            {sidebarOpen && (
+              <>
+                {/* New Request Button */}
+                <div className="p-4">
                   <button
-                    type="submit"
-                    className="px-8 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-semibold transition-colors"
+                    onClick={() => setShowNewRequest(!showNewRequest)}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors flex items-center justify-center shadow-lg"
                   >
-                    Submit Request
+                    <MapPin className="w-5 h-5 mr-2" />
+                    {showNewRequest ? 'Cancel' : 'New Request'}
                   </button>
                 </div>
-              </form>
-            </div>
-          )}
 
-          {/* Requests List */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100">
-            <div className="p-6 border-b border-slate-100">
-              <h2 className="text-xl font-semibold text-slate-900">My Requests</h2>
-            </div>
-            <div className="divide-y divide-slate-100">
-              {requests.length === 0 ? (
-                <div className="p-12 text-center">
-                  <Car className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-500">No requests yet. Create your first request!</p>
-                </div>
-              ) : (
-                requests.map((request) => (
-                  <div key={request.id} className="p-6 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                            {request.status}
-                          </span>
-                          <span className="text-sm text-slate-500">
-                            {new Date(request.createdAt).toLocaleDateString()}
-                          </span>
+                {/* New Request Form */}
+                {showNewRequest && (
+                  <div className="px-4 pb-4">
+                    <div className="bg-gray-50 rounded-xl p-4 border-2 border-blue-200">
+                      <h3 className="font-medium mb-3">Create New Request</h3>
+                      <form onSubmit={handleSubmit} className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Pickup Location</label>
+                          <input
+                            type="text"
+                            value={formData.pickupLocation}
+                            onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter pickup location"
+                            required
+                          />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="w-4 h-4 text-sky-500" />
-                            <span className="text-slate-900">{request.pickupLocation}</span>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Drop-off Location</label>
+                          <input
+                            type="text"
+                            value={formData.dropoffLocation}
+                            onChange={(e) => setFormData({ ...formData, dropoffLocation: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter drop-off location"
+                            required
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Pickup</label>
+                            <input
+                              type="datetime-local"
+                              value={formData.pickupDate}
+                              onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                              required
+                            />
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <ArrowRight className="w-4 h-4 text-slate-400" />
-                            <span className="text-slate-900">{request.dropoffLocation}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Car className="w-4 h-4 text-slate-500" />
-                            <span className="text-slate-600">{request.carType}</span>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Drop-off</label>
+                            <input
+                              type="datetime-local"
+                              value={formData.dropoffDate}
+                              onChange={(e) => setFormData({ ...formData, dropoffDate: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                              required
+                            />
                           </div>
                         </div>
-                        <div className="flex items-center space-x-4 mt-2 text-sm text-slate-500">
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>{new Date(request.pickupDate).toLocaleDateString()} - {new Date(request.dropoffDate).toLocaleDateString()}</span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Car Type</label>
+                            <select
+                              value={formData.carType}
+                              onChange={(e) => setFormData({ ...formData, carType: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                            >
+                              <option value="Sedan">Sedan</option>
+                              <option value="SUV">SUV</option>
+                              <option value="Truck">Truck</option>
+                              <option value="Van">Van</option>
+                              <option value="Sports Car">Sports Car</option>
+                              <option value="Luxury">Luxury</option>
+                            </select>
                           </div>
-                          <div className="flex items-center space-x-1">
-                            <DollarSign className="w-4 h-4" />
-                            <span>${request.budget}/day</span>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Budget/day</label>
+                            <input
+                              type="number"
+                              value={formData.budget}
+                              onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                              placeholder="$"
+                              required
+                            />
                           </div>
                         </div>
-                      </div>
-                      <Link
-                        to={`/dashboard/request/${request.id}`}
-                        className="ml-4 px-4 py-2 bg-sky-100 text-sky-600 rounded-lg font-medium hover:bg-sky-200 transition-colors"
-                      >
-                        View Offers
-                      </Link>
+                        <button
+                          type="submit"
+                          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Submit Request
+                        </button>
+                      </form>
                     </div>
                   </div>
-                ))
+                )}
+
+                {/* Requests List */}
+                <div className="flex-1 overflow-y-auto px-4">
+                  {requests.length === 0 ? (
+                    <div className="text-center py-8">
+                      <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                      <p className="text-gray-500 text-sm">No requests yet</p>
+                      <p className="text-xs text-gray-400 mt-1">Click "New Request" to get started</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {requests.map((request) => (
+                        <div
+                          key={request.id}
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setShowOffers(true);
+                          }}
+                          className={`p-3 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md ${
+                            selectedRequest?.id === request.id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center">
+                              <div className={`w-3 h-3 rounded-full ${getStatusColor(request.status)} mr-2`}></div>
+                              <span className="text-xs font-medium text-gray-600">{request.status}</span>
+                            </div>
+                            <span className="text-xs text-gray-400">
+                              {new Date(request.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-start">
+                              <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
+                                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Pickup</p>
+                                <p className="text-sm font-medium truncate">{request.pickupLocation}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-start">
+                              <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">
+                                <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500">Drop-off</p>
+                                <p className="text-sm font-medium truncate">{request.dropoffLocation}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
+                              <span>{request.carType}</span>
+                              <span className="font-medium text-blue-600">${request.budget}/day</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Map Area */}
+        <div className="flex-1 relative bg-gray-100">
+          {/* Google Maps-like Interface */}
+          <div className="absolute inset-0 bg-[#e5e3df]">
+            {/* Grid Pattern (mimicking map) */}
+            <div className="absolute inset-0" style={{
+              backgroundImage: `linear-gradient(#ccc 1px, transparent 1px), linear-gradient(90deg, #ccc 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }}></div>
+            
+            {/* Location Markers */}
+            {locations.map((location) => (
+              <div
+                key={location.id}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+                style={{ left: `${((location.lng + 74.006) * 100)}%`, top: `${((location.lat - 40.7128) * 100)}%` }}
+                onClick={() => {
+                  setSelectedRequest(requests.find(r => r.id === location.id) || null);
+                  setShowOffers(true);
+                }}
+              >
+                {/* Marker */}
+                <div className="relative">
+                  <div className={`w-8 h-8 ${getStatusColor(location.status)} rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform`}>
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  {/* Pulse Effect */}
+                  <div className={`absolute inset-0 ${getStatusColor(location.status)} rounded-full animate-ping opacity-25`}></div>
+                </div>
+                
+                {/* Info Window on Hover */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block">
+                  <div className="bg-white rounded-lg shadow-lg p-2 text-xs whitespace-nowrap">
+                    <p className="font-semibold">{location.name}</p>
+                    <p className="text-gray-600">{location.carType} • ${location.budget}/day</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* My Location */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="relative">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-xl border-4 border-white">
+                  <div className="w-4 h-4 bg-white rounded-full"></div>
+                </div>
+                <div className="absolute inset-0 bg-blue-600 rounded-full animate-ping opacity-25"></div>
+              </div>
+            </div>
+
+            {/* Map Controls */}
+            <div className="absolute top-4 right-4 flex flex-col space-y-2">
+              <button className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50">
+                <span className="text-xl font-medium">+</span>
+              </button>
+              <button className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50">
+                <span className="text-xl font-medium">−</span>
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-96">
+              <div className="bg-white rounded-lg shadow-lg flex items-center p-2">
+                <MapPin className="w-5 h-5 text-gray-400 ml-2" />
+                <input
+                  type="text"
+                  placeholder="Search for locations..."
+                  className="flex-1 px-3 py-2 outline-none text-sm"
+                />
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                  Search
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Offers Sidebar */}
+        {showOffers && selectedRequest && (
+          <div className="absolute right-0 top-0 bottom-0 w-96 bg-white shadow-xl z-30 overflow-y-auto animate-slide-left">
+            <div className="p-4 border-b sticky top-0 bg-white flex items-center justify-between">
+              <h3 className="font-semibold text-lg">Offers for this request</h3>
+              <button
+                onClick={() => setShowOffers(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4">
+              {/* Request Summary */}
+              <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-blue-700">Request Details</span>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    selectedRequest.status === 'OPEN' ? 'bg-green-100 text-green-700' :
+                    selectedRequest.status === 'NEGOTIATING' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-blue-100 text-blue-700'
+                  }`}>
+                    {selectedRequest.status}
+                  </span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 text-green-600 mr-2" />
+                    <span className="text-gray-600">{selectedRequest.pickupLocation}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 text-red-600 mr-2" />
+                    <span className="text-gray-600">{selectedRequest.dropoffLocation}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-blue-100">
+                    <span>{selectedRequest.carType}</span>
+                    <span className="font-medium">Budget: ${selectedRequest.budget}/day</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Offers List */}
+              {getOffersByRequestId(selectedRequest.id).length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                  <p className="text-gray-500 text-sm">No offers yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Agencies will respond soon</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {getOffersByRequestId(selectedRequest.id).map((offer) => {
+                    const agency = getUserById(offer.agencyId);
+                    return (
+                      <div key={offer.id} className="border rounded-xl p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold">{offer.carModel}</h4>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            offer.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
+                            offer.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {offer.status}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{agency?.companyName || `${agency?.firstName} ${agency?.lastName}`}</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-lg font-bold text-blue-600">${offer.finalRate || offer.dailyRate}</span>
+                            <span className="text-xs text-gray-500">/day</span>
+                          </div>
+                          <Link
+                            to={`/dashboard/request/${selectedRequest.id}`}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                          >
+                            View Details
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
+        )}
+
+        {/* Floating Action Buttons */}
+        <div className="absolute bottom-6 right-6 flex flex-col space-y-3 z-10">
+          <button
+            onClick={() => setShowNewRequest(true)}
+            className="w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110"
+          >
+            <MapPin className="w-6 h-6" />
+          </button>
+          <button className="w-14 h-14 bg-white hover:bg-gray-50 text-gray-700 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110">
+            <div className="w-6 h-6 bg-blue-600 rounded-full border-2 border-white"></div>
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
 // Client Request Detail Page
 function ClientRequestDetail() {
   const { user } = useAuth();
@@ -1346,7 +1311,7 @@ function ClientRequestDetail() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-600">Request not found</p>
-          <Link to="/dashboard" className="text-sky-600 hover:underline mt-2 inline-block">
+          <Link to="/dashboard" className="text-amber-600 hover:underline mt-2 inline-block">
             Back to Dashboard
           </Link>
         </div>
@@ -1432,7 +1397,7 @@ function ClientRequestDetail() {
     <div className="min-h-screen bg-slate-50">
       <div className="pt-20 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link to="/dashboard" className="text-sky-600 hover:underline mb-4 inline-block">
+          <Link to="/dashboard" className="text-amber-600 hover:underline mb-4 inline-block">
             &larr; Back to Dashboard
           </Link>
 
@@ -1443,7 +1408,7 @@ function ClientRequestDetail() {
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                 request.status === 'OPEN' ? 'bg-emerald-100 text-emerald-700' :
                 request.status === 'NEGOTIATING' ? 'bg-amber-100 text-amber-700' :
-                'bg-sky-100 text-sky-700'
+                'bg-amber-100 text-amber-700'
               }`}>
                 {request.status}
               </span>
@@ -1531,11 +1496,11 @@ function ClientRequestDetail() {
                                       msg.isPriceProposal
                                         ? 'bg-amber-100 text-amber-800 border-2 border-amber-300'
                                         : isOwn
-                                          ? 'bg-sky-500 text-white'
+                                          ? 'bg-amber-500 text-white'
                                           : 'bg-white text-slate-900 border border-slate-200'
                                     }`}>
                                       <p className="text-sm">{msg.content}</p>
-                                      <p className={`text-xs mt-1 ${isOwn ? 'text-sky-100' : 'text-slate-500'}`}>
+                                      <p className={`text-xs mt-1 ${isOwn ? 'text-amber-100' : 'text-slate-500'}`}>
                                         {sender?.firstName} - {new Date(msg.createdAt).toLocaleTimeString()}
                                       </p>
                                     </div>
@@ -1581,7 +1546,7 @@ function ClientRequestDetail() {
                                   />
                                   <button
                                     onClick={() => handleSendMessage(offer.id)}
-                                    className="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
+                                    className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
                                   >
                                     Send
                                   </button>
@@ -1698,8 +1663,8 @@ function AgencyDashboard() {
                   <p className="text-slate-600">Total Offers</p>
                   <p className="text-3xl font-bold text-slate-900">{totalOffers}</p>
                 </div>
-                <div className="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center">
-                  <Car className="w-6 h-6" />
+                <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                  <RouteIcon  className="w-6 h-6" />
                 </div>
               </div>
             </div>
@@ -1735,7 +1700,7 @@ function AgencyDashboard() {
             <div className="divide-y divide-slate-100">
               {offers.length === 0 ? (
                 <div className="p-12 text-center">
-                  <Car className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                  <RouteIcon  className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                   <p className="text-slate-500">No offers submitted yet</p>
                 </div>
               ) : (
@@ -1761,7 +1726,7 @@ function AgencyDashboard() {
                         {offer.status !== 'ACCEPTED' && offer.status !== 'REJECTED' && (
                           <Link
                             to={`/agency/chat/${offer.id}`}
-                            className="px-4 py-2 bg-sky-100 text-sky-600 rounded-lg font-medium hover:bg-sky-200 transition-colors"
+                            className="px-4 py-2 bg-amber-100 text-amber-600 rounded-lg font-medium hover:bg-amber-200 transition-colors"
                           >
                             View Chat
                           </Link>
@@ -1799,7 +1764,7 @@ function AgencyDashboard() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
-                          <MapPin className="w-4 h-4 text-sky-500" />
+                          <MapPin className="w-4 h-4 text-amber-500" />
                           <span className="font-medium text-slate-900">
                             {request.pickupLocation} &rarr; {request.dropoffLocation}
                           </span>
@@ -1855,7 +1820,7 @@ function AgencyDashboard() {
                             <div className="flex space-x-2">
                               <button
                                 onClick={() => handleSubmitOffer(request.id)}
-                                className="flex-1 py-2 bg-sky-500 text-white rounded-lg text-sm hover:bg-sky-600"
+                                className="flex-1 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600"
                               >
                                 Submit
                               </button>
@@ -1871,7 +1836,7 @@ function AgencyDashboard() {
                       ) : (
                         <button
                           onClick={() => setShowOfferForm(request.id)}
-                          className="ml-4 px-4 py-2 bg-sky-500 text-white rounded-lg font-medium hover:bg-sky-600 transition-colors"
+                          className="ml-4 px-4 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors"
                         >
                           Make Offer
                         </button>
@@ -1911,7 +1876,7 @@ function AgencyChat() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-600">Offer not found</p>
-          <Link to="/agency" className="text-sky-600 hover:underline mt-2 inline-block">
+          <Link to="/agency" className="text-amber-600 hover:underline mt-2 inline-block">
             Back to Dashboard
           </Link>
         </div>
@@ -1976,7 +1941,7 @@ function AgencyChat() {
     <div className="min-h-screen bg-slate-50">
       <div className="pt-20 pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link to="/agency" className="text-sky-600 hover:underline mb-4 inline-block">
+          <Link to="/agency" className="text-amber-600 hover:underline mb-4 inline-block">
             &larr; Back to Dashboard
           </Link>
 
@@ -2017,11 +1982,11 @@ function AgencyChat() {
                         msg.isPriceProposal
                           ? 'bg-amber-100 text-amber-800 border-2 border-amber-300'
                           : isOwn
-                            ? 'bg-sky-500 text-white'
+                            ? 'bg-amber-500 text-white'
                             : 'bg-white text-slate-900 border border-slate-200'
                       }`}>
                         <p className="text-sm">{msg.content}</p>
-                        <p className={`text-xs mt-1 ${isOwn ? 'text-sky-100' : 'text-slate-500'}`}>
+                        <p className={`text-xs mt-1 ${isOwn ? 'text-amber-100' : 'text-slate-500'}`}>
                           {sender?.firstName} - {new Date(msg.createdAt).toLocaleTimeString()}
                         </p>
                       </div>
@@ -2068,7 +2033,7 @@ function AgencyChat() {
                     />
                     <button
                       onClick={handleSendMessage}
-                      className="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
+                      className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
                     >
                       Send
                     </button>
@@ -2159,7 +2124,7 @@ function NotificationBell({ userId, userRole }: { userId: string; userRole: stri
     <div className="relative">
       <button
         onClick={() => setShowDropdown(!showDropdown)}
-        className="relative p-2 text-slate-600 hover:text-sky-600 transition-colors"
+        className="relative p-2 text-slate-600 hover:text-amber-600 transition-colors"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -2182,7 +2147,7 @@ function NotificationBell({ userId, userRole }: { userId: string; userRole: stri
                 <div
                   key={notif.id}
                   className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors ${
-                    !notif.read ? 'bg-sky-50' : ''
+                    !notif.read ? 'bg-amber-50' : ''
                   }`}
                 >
                   <p className="text-sm text-slate-700">{notif.text}</p>
@@ -2261,9 +2226,9 @@ function ProfilePage() {
 
           {/* Profile Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-            <div className="bg-gradient-to-r from-sky-500 to-sky-600 h-32 relative">
+            <div className="bg-gradient-to-r from-amber-500 to-amber-600 h-32 relative">
               <div className="absolute -bottom-12 left-6">
-                <div className="w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center text-3xl font-bold text-sky-600">
+                <div className="w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center text-3xl font-bold text-amber-600">
                   {user.firstName[0]}{user.lastName[0]}
                 </div>
               </div>
@@ -2273,11 +2238,11 @@ function ProfilePage() {
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900">{user.firstName} {user.lastName}</h2>
                   {user.companyName && (
-                    <p className="text-sky-600 font-medium">{user.companyName}</p>
+                    <p className="text-amber-600 font-medium">{user.companyName}</p>
                   )}
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  user.role === 'CLIENT' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700'
+                  user.role === 'CLIENT' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
                 }`}>
                   {user.role}
                 </span>
@@ -2302,7 +2267,7 @@ function ProfilePage() {
               <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
               <button
                 onClick={() => setIsEditing(!isEditing)}
-                className="px-4 py-2 text-sm bg-sky-100 text-sky-600 rounded-lg hover:bg-sky-200 transition-colors"
+                className="px-4 py-2 text-sm bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-colors"
               >
                 {isEditing ? 'Cancel' : 'Edit'}
               </button>
@@ -2316,7 +2281,7 @@ function ProfilePage() {
                     type="text"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-slate-900 font-medium">{user.firstName}</p>
@@ -2329,7 +2294,7 @@ function ProfilePage() {
                     type="text"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-slate-900 font-medium">{user.lastName}</p>
@@ -2342,7 +2307,7 @@ function ProfilePage() {
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-slate-900 font-medium">{user.phone}</p>
@@ -2355,7 +2320,7 @@ function ProfilePage() {
                     type="text"
                     value={formData.nationality}
                     onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 ) : (
                   <p className="text-slate-900 font-medium">{user.nationality}</p>
@@ -2369,7 +2334,7 @@ function ProfilePage() {
                       type="text"
                       value={formData.companyName}
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
                   ) : (
                     <p className="text-slate-900 font-medium">{user.companyName}</p>
@@ -2391,7 +2356,7 @@ function ProfilePage() {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={handleSave}
-                  className="px-6 py-2.5 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors font-medium"
+                  className="px-6 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
                 >
                   Save Changes
                 </button>
@@ -2451,7 +2416,7 @@ function BookingConfirmation() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="p-6 bg-gradient-to-r from-sky-50 to-emerald-50 border-b border-slate-100">
+            <div className="p-6 bg-gradient-to-r from-amber-50 to-emerald-50 border-b border-slate-100">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">{offer.carModel}</h2>
@@ -2492,18 +2457,18 @@ function BookingConfirmation() {
                 </div>
               </div>
 
-              <div className="bg-sky-50 rounded-xl p-4 mt-4">
-                <h4 className="font-medium text-sky-800 mb-2">Agency Contact</h4>
-                <p className="text-sm text-sky-700">{agencyName}</p>
-                <p className="text-sm text-sky-700">{agency?.phone}</p>
-                <p className="text-sm text-sky-700">{agency?.email}</p>
+              <div className="bg-amber-50 rounded-xl p-4 mt-4">
+                <h4 className="font-medium text-amber-800 mb-2">Agency Contact</h4>
+                <p className="text-sm text-amber-700">{agencyName}</p>
+                <p className="text-sm text-amber-700">{agency?.phone}</p>
+                <p className="text-sm text-amber-700">{agency?.email}</p>
               </div>
             </div>
 
             <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-center space-x-4">
               <Link
                 to="/dashboard"
-                className="px-6 py-3 bg-sky-500 text-white rounded-xl font-medium hover:bg-sky-600 transition-colors"
+                className="px-6 py-3 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition-colors"
               >
                 Back to Dashboard
               </Link>
@@ -2523,7 +2488,7 @@ function AppContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
       </div>
     );
   }
@@ -2535,6 +2500,9 @@ function AppContent() {
       {!hideHeader && <Header />}
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/team" element={<TeamPage />} />
         <Route path="/auth/signin" element={<SignInPage />} />
         <Route path="/auth/signup" element={<SignUpPage />} />
         <Route
