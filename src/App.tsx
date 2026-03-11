@@ -18,13 +18,20 @@ import {
   Clock,
   Shield,
   Zap,
+  Sparkles,
+  Loader2,
   ChevronRight,
   Route as RouteIcon
 } from 'lucide-react';
-
+ 
 import ServicesPage from './pages/ServicesPage';
 import AboutPage from './pages/AboutPage';
 import TeamPage from './pages/TeamPage';
+import AIAssistantCard from './components/AIAssistantCard';
+import { askAI, extractFirstUsdNumber } from './lib/aiAssistant';
+import AIRequestWizard from './components/AIRequestWizard';
+import OfferFitBadge from './components/OfferFitBadge';
+import { scoreOfferFit } from './lib/aiAssistant';
 
 // shared data
 import { services } from './lib/services';
@@ -828,6 +835,7 @@ function ClientDashboard() {
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [showOffers, setShowOffers] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showAiWizard, setShowAiWizard] = useState(false);
   const [formData, setFormData] = useState({
     pickupLocation: '',
     dropoffLocation: '',
@@ -837,12 +845,45 @@ function ClientDashboard() {
     budget: '',
     additionalNotes: '',
   });
+  const [aiRequestLoading, setAiRequestLoading] = useState(false);
+  const [aiRequestMode, setAiRequestMode] = useState<'offline' | 'api' | null>(null);
 
   useEffect(() => {
     if (user) {
       setRequests(getRequestsByClientId(user.id));
     }
   }, [user]);
+
+  const handleAiFillNotes = async () => {
+    if (!user) return;
+    setAiRequestLoading(true);
+    try {
+      const question =
+        `Write "additional notes" for a client car rental request.\n` +
+        `Pickup: ${formData.pickupLocation}\n` +
+        `Drop-off: ${formData.dropoffLocation}\n` +
+        `Pickup date/time: ${formData.pickupDate}\n` +
+        `Drop-off date/time: ${formData.dropoffDate}\n` +
+        `Car type: ${formData.carType}\n` +
+        `Budget: $${formData.budget}/day\n\n` +
+        `Return a short, clear note (max 6 lines). Mention: driver age (ask if needed), payment/deposit question, insurance/mileage question, and any preference like automatic/AC if relevant.`;
+
+      const res = await askAI({
+        user,
+        stats: [
+          { label: 'Total Requests', value: requests.length },
+          { label: 'Active', value: requests.filter((r) => r.status === 'OPEN' || r.status === 'NEGOTIATING').length },
+          { label: 'Completed', value: requests.filter((r) => r.status === 'BOOKED' || r.status === 'COMPLETED').length },
+        ],
+        question,
+        requests,
+      });
+      setAiRequestMode(res.mode);
+      setFormData((prev) => ({ ...prev, additionalNotes: res.answer }));
+    } finally {
+      setAiRequestLoading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -886,19 +927,39 @@ function ClientDashboard() {
 
   const activeRequests = requests.filter(r => r.status !== 'COMPLETED' && r.status !== 'CANCELLED').length;
 
-  // Mock locations for map markers (in real app, these would be geocoded)
-  const locations = requests.map((request, index) => ({
-    id: request.id,
-    name: request.pickupLocation,
-    lat: 40.7128 + (index * 0.01), // Mock coordinates
-    lng: -74.0060 + (index * 0.01),
-    status: request.status,
-    budget: request.budget,
-    carType: request.carType,
-  }));
+  // Mock locations for map markers (kept close and always visible)
+  const locations = requests.map((request, index) => {
+    const col = index % 3;
+    const row = Math.floor(index / 3);
+    const left = 20 + col * 25; // 20%, 45%, 70%
+    const top = 30 + row * 18; // 30%, 48%, 66%, ...
+    return {
+      id: request.id,
+      name: request.pickupLocation,
+      left,
+      top,
+      status: request.status,
+      budget: request.budget,
+      carType: request.carType,
+    };
+  });
 
   return (
     <div className="h-screen flex flex-col pt-16">
+      {user && (
+        <AIRequestWizard
+          open={showAiWizard}
+          onClose={() => setShowAiWizard(false)}
+          user={user}
+          currentStats={[
+            { label: 'Total Requests', value: requests.length },
+            { label: 'Active', value: requests.filter((r) => r.status === 'OPEN' || r.status === 'NEGOTIATING').length },
+            { label: 'Completed', value: requests.filter((r) => r.status === 'BOOKED' || r.status === 'COMPLETED').length },
+          ]}
+          initialDraft={formData}
+          onApply={(draft) => setFormData(draft)}
+        />
+      )}
       {/* Main Container */}
       <div className="flex-1 flex relative">
         {/* Sidebar */}
@@ -934,19 +995,32 @@ function ClientDashboard() {
               <>
                 {/* New Request Button */}
                 <div className="p-4">
-                  <button
-                    onClick={() => setShowNewRequest(!showNewRequest)}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors flex items-center justify-center shadow-lg"
-                  >
-                    <MapPin className="w-5 h-5 mr-2" />
-                    {showNewRequest ? 'Cancel' : 'New Request'}
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setShowNewRequest(!showNewRequest)}
+                      className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold transition-colors flex items-center justify-center shadow-lg"
+                    >
+                      <MapPin className="w-5 h-5 mr-2" />
+                      {showNewRequest ? 'Cancel' : 'New Request'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowNewRequest(true);
+                        setShowAiWizard(true);
+                      }}
+                      className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold transition-colors flex items-center justify-center shadow-lg"
+                      title="Let AI help craft a strong request"
+                    >
+                      <Sparkles className="w-5 h-5 mr-2" />
+                      AI Wizard
+                    </button>
+                  </div>
                 </div>
 
                 {/* New Request Form */}
                 {showNewRequest && (
                   <div className="px-4 pb-4">
-                    <div className="bg-gray-50 rounded-xl p-4 border-2 border-blue-200">
+                    <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                       <h3 className="font-medium mb-3">Create New Request</h3>
                       <form onSubmit={handleSubmit} className="space-y-3">
                         <div>
@@ -955,7 +1029,7 @@ function ClientDashboard() {
                             type="text"
                             value={formData.pickupLocation}
                             onChange={(e) => setFormData({ ...formData, pickupLocation: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500"
                             placeholder="Enter pickup location"
                             required
                           />
@@ -966,7 +1040,7 @@ function ClientDashboard() {
                             type="text"
                             value={formData.dropoffLocation}
                             onChange={(e) => setFormData({ ...formData, dropoffLocation: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500"
                             placeholder="Enter drop-off location"
                             required
                           />
@@ -1015,15 +1089,47 @@ function ClientDashboard() {
                               type="number"
                               value={formData.budget}
                               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
                               placeholder="$"
                               required
                             />
                           </div>
                         </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-xs font-medium text-gray-600">Additional Notes</label>
+                            <button
+                              type="button"
+                              onClick={handleAiFillNotes}
+                              disabled={
+                                aiRequestLoading ||
+                                !formData.pickupLocation ||
+                                !formData.dropoffLocation ||
+                                !formData.pickupDate ||
+                                !formData.dropoffDate ||
+                                !formData.budget
+                              }
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {aiRequestLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                              AI fill
+                            </button>
+                          </div>
+                          <textarea
+                            value={formData.additionalNotes}
+                            onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 min-h-[88px]"
+                            placeholder="Any preferences? (insurance, mileage, deposit, automatic, etc.)"
+                          />
+                          {aiRequestMode && (
+                            <div className="mt-1 text-[11px] text-gray-500">
+                              AI mode: <span className="font-medium">{aiRequestMode === 'api' ? 'API' : 'Offline'}</span>
+                            </div>
+                          )}
+                        </div>
                         <button
                           type="submit"
-                          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                          className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors"
                         >
                           Submit Request
                         </button>
@@ -1116,7 +1222,7 @@ function ClientDashboard() {
               <div
                 key={location.id}
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-                style={{ left: `${((location.lng + 74.006) * 100)}%`, top: `${((location.lat - 40.7128) * 100)}%` }}
+                style={{ left: `${location.left}%`, top: `${location.top}%` }}
                 onClick={() => {
                   setSelectedRequest(requests.find(r => r.id === location.id) || null);
                   setShowOffers(true);
@@ -1291,6 +1397,8 @@ function ClientRequestDetail() {
   const [messageInput, setMessageInput] = useState('');
   const [priceInput, setPriceInput] = useState('');
   const [showPriceInput, setShowPriceInput] = useState(false);
+  const [aiChatLoading, setAiChatLoading] = useState<Record<string, boolean>>({});
+  const [aiChatMode, setAiChatMode] = useState<'offline' | 'api' | null>(null);
 
   const request = getRequestsFromStorage().find((r: Request) => r.id === id);
 
@@ -1377,6 +1485,73 @@ function ClientRequestDetail() {
     setShowPriceInput(false);
   };
 
+  const handleAiSuggestReply = async (offer: Offer) => {
+    if (!user || !request) return;
+    setAiChatLoading((prev) => ({ ...prev, [offer.id]: true }));
+    try {
+      const convo = (messages[offer.id] || []).slice(-6).map((m) => {
+        const sender = getUserById(m.senderId);
+        const name = sender?.companyName || sender?.firstName || 'User';
+        return `${name}: ${m.content}`;
+      });
+
+      const question =
+        `You are helping a CLIENT negotiate a car rental offer. Draft a short message to the agency.\n\n` +
+        `Client request:\n` +
+        `- Pickup: ${request.pickupLocation}\n` +
+        `- Drop-off: ${request.dropoffLocation}\n` +
+        `- Dates: ${request.pickupDate} to ${request.dropoffDate}\n` +
+        `- Car type: ${request.carType}\n` +
+        `- Budget: $${request.budget}/day\n` +
+        (request.additionalNotes ? `- Notes: ${request.additionalNotes}\n` : '') +
+        `\nOffer:\n` +
+        `- Car model: ${offer.carModel}\n` +
+        `- Rate: $${offer.finalRate || offer.dailyRate}/day\n\n` +
+        (convo.length ? `Recent messages:\n${convo.join('\n')}\n\n` : '') +
+        `Write ONE message under 300 characters. Ask 1-2 key questions (insurance/mileage/deposit) and, if price is high, politely request a better final rate.`;
+
+      const res = await askAI({
+        user,
+        stats: [{ label: 'Active', value: 1 }],
+        question,
+        requests: [request],
+        offers: [{ id: offer.id, status: offer.status, dailyRate: offer.dailyRate, finalRate: offer.finalRate, carModel: offer.carModel, createdAt: offer.createdAt }],
+      });
+      setAiChatMode(res.mode);
+      setMessageInput(res.answer.replace(/^AI response\s*/i, '').trim());
+    } finally {
+      setAiChatLoading((prev) => ({ ...prev, [offer.id]: false }));
+    }
+  };
+
+  const handleAiSuggestCounterPrice = async (offer: Offer) => {
+    if (!user || !request) return;
+    setAiChatLoading((prev) => ({ ...prev, [offer.id]: true }));
+    try {
+      const question =
+        `Suggest a reasonable counter-offer daily rate (USD number) for this car rental.\n` +
+        `Request budget: $${request.budget}/day. Offer rate: $${offer.finalRate || offer.dailyRate}/day.\n` +
+        `Return ONLY one line like: "$42" (no extra text).`;
+      const res = await askAI({
+        user,
+        stats: [{ label: 'Active', value: 1 }],
+        question,
+        requests: [request],
+      });
+      setAiChatMode(res.mode);
+      const n = extractFirstUsdNumber(res.answer);
+      if (n !== null) {
+        setShowPriceInput(true);
+        setPriceInput(String(n));
+      } else {
+        setShowPriceInput(false);
+        setMessageInput(`Could you do a better final rate closer to $${request.budget}/day?`);
+      }
+    } finally {
+      setAiChatLoading((prev) => ({ ...prev, [offer.id]: false }));
+    }
+  };
+
   const handleAcceptOffer = (offerId: string) => {
     const result = acceptOfferInStorage(offerId);
     if (result.success) {
@@ -1391,6 +1566,48 @@ function ClientRequestDetail() {
     if (agency) {
       agencyNames[o.agencyId] = agency.companyName || `${agency.firstName} ${agency.lastName}`;
     }
+  });
+
+  const rankedOffers = [...offers].sort((a, b) => {
+    const fa = scoreOfferFit({
+      request: {
+        id: request.id,
+        status: request.status,
+        pickupLocation: request.pickupLocation,
+        dropoffLocation: request.dropoffLocation,
+        budget: request.budget,
+        pickupDate: request.pickupDate,
+        dropoffDate: request.dropoffDate,
+      },
+      offer: {
+        id: a.id,
+        status: a.status,
+        carModel: a.carModel,
+        dailyRate: a.dailyRate,
+        finalRate: a.finalRate,
+        createdAt: a.createdAt,
+      },
+    }).score;
+    const fb = scoreOfferFit({
+      request: {
+        id: request.id,
+        status: request.status,
+        pickupLocation: request.pickupLocation,
+        dropoffLocation: request.dropoffLocation,
+        budget: request.budget,
+        pickupDate: request.pickupDate,
+        dropoffDate: request.dropoffDate,
+      },
+      offer: {
+        id: b.id,
+        status: b.status,
+        carModel: b.carModel,
+        dailyRate: b.dailyRate,
+        finalRate: b.finalRate,
+        createdAt: b.createdAt,
+      },
+    }).score;
+    return fb - fa;
   });
 
   return (
@@ -1436,7 +1653,12 @@ function ClientRequestDetail() {
           </div>
 
           {/* Offers */}
-          <h2 className="text-xl font-semibold text-slate-900 mb-4">Offers from Agencies ({offers.length})</h2>
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">Offers from Agencies ({offers.length})</h2>
+              <p className="text-sm text-slate-600 mt-1">Sorted by AI Fit (best match first).</p>
+            </div>
+          </div>
 
           {offers.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center">
@@ -1445,7 +1667,7 @@ function ClientRequestDetail() {
             </div>
           ) : (
             <div className="space-y-4">
-              {offers.map((offer: Offer) => (
+              {rankedOffers.map((offer: Offer) => (
                 <div key={offer.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -1459,6 +1681,25 @@ function ClientRequestDetail() {
                         }`}>
                           {offer.status}
                         </span>
+                        <OfferFitBadge
+                          request={{
+                            id: request.id,
+                            status: request.status,
+                            pickupLocation: request.pickupLocation,
+                            dropoffLocation: request.dropoffLocation,
+                            budget: request.budget,
+                            pickupDate: request.pickupDate,
+                            dropoffDate: request.dropoffDate,
+                          }}
+                          offer={{
+                            id: offer.id,
+                            status: offer.status,
+                            carModel: offer.carModel,
+                            dailyRate: offer.dailyRate,
+                            finalRate: offer.finalRate,
+                            createdAt: offer.createdAt,
+                          }}
+                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
@@ -1551,11 +1792,33 @@ function ClientRequestDetail() {
                                     Send
                                   </button>
                                   <button
+                                    onClick={() => handleAiSuggestReply(offer)}
+                                    disabled={!!aiChatLoading[offer.id]}
+                                    className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                                    title="Generate a suggested reply"
+                                  >
+                                    {aiChatLoading[offer.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                    AI Reply
+                                  </button>
+                                  <button
                                     onClick={() => setShowPriceInput(true)}
-                                    className="px-4 py-2 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200"
+                                    className="px-4 py-2 bg-amber-50 text-amber-800 border border-amber-100 rounded-lg hover:bg-amber-100"
                                   >
                                     Propose Price
                                   </button>
+                                  <button
+                                    onClick={() => handleAiSuggestCounterPrice(offer)}
+                                    disabled={!!aiChatLoading[offer.id]}
+                                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Suggest a counter price"
+                                  >
+                                    AI Price
+                                  </button>
+                                </div>
+                              )}
+                              {aiChatMode && (
+                                <div className="text-[11px] text-slate-500">
+                                  AI mode: <span className="font-medium">{aiChatMode === 'api' ? 'API' : 'Offline'}</span>
                                 </div>
                               )}
                             </div>
@@ -2195,15 +2458,18 @@ function ProfilePage() {
 
   // Stats
   let stats: { label: string; value: number }[] = [];
+  const clientRequests = user.role === 'CLIENT' ? getRequestsByClientId(user.id) : [];
+  const agencyOffers = user.role === 'AGENCY' ? getOffersByAgencyId(user.id) : [];
+
   if (user.role === 'CLIENT') {
-    const requests = getRequestsByClientId(user.id);
+    const requests = clientRequests;
     stats = [
       { label: 'Total Requests', value: requests.length },
       { label: 'Active', value: requests.filter(r => r.status === 'OPEN' || r.status === 'NEGOTIATING').length },
       { label: 'Completed', value: requests.filter(r => r.status === 'BOOKED' || r.status === 'COMPLETED').length },
     ];
   } else {
-    const offers = getOffersByAgencyId(user.id);
+    const offers = agencyOffers;
     stats = [
       { label: 'Total Offers', value: offers.length },
       { label: 'Accepted', value: offers.filter(o => o.status === 'ACCEPTED').length },
@@ -2214,168 +2480,192 @@ function ProfilePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="pt-20 pb-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-8">My Profile</h1>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">Profile</h1>
+              <p className="text-slate-600 mt-1">Manage your info and get AI-powered recommendations.</p>
+            </div>
+            <button
+              onClick={() => setIsEditing((v) => !v)}
+              className={`px-4 py-2.5 text-sm rounded-xl transition-colors font-medium border ${
+                isEditing
+                  ? 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  : 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600'
+              }`}
+            >
+              {isEditing ? 'Cancel editing' : 'Edit profile'}
+            </button>
+          </div>
 
           {saved && (
-            <div className="mb-6 p-4 bg-emerald-50 text-emerald-700 rounded-xl flex items-center space-x-2">
+            <div className="mb-6 p-4 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center gap-2 border border-emerald-100">
               <CheckCircle className="w-5 h-5" />
               <span>Profile updated successfully!</span>
             </div>
           )}
 
-          {/* Profile Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-8">
-            <div className="bg-gradient-to-r from-amber-500 to-amber-600 h-32 relative">
-              <div className="absolute -bottom-12 left-6">
-                <div className="w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center text-3xl font-bold text-amber-600">
-                  {user.firstName[0]}{user.lastName[0]}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div className="lg:sticky lg:top-24 space-y-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white/95 rounded-2xl shadow-sm flex items-center justify-center text-2xl font-bold text-amber-700">
+                        {user.firstName[0]}
+                        {user.lastName[0]}
+                      </div>
+                      <div className="text-white">
+                        <div className="text-lg font-semibold leading-tight">
+                          {user.firstName} {user.lastName}
+                        </div>
+                        <div className="text-white/80 text-sm">{user.email}</div>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                        user.role === 'CLIENT'
+                          ? 'bg-white/15 text-white border-white/20'
+                          : 'bg-emerald-500/20 text-white border-emerald-200/20'
+                      }`}
+                    >
+                      {user.role}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {user.companyName && <div className="text-slate-900 font-semibold">{user.companyName}</div>}
+                  <div className="text-sm text-slate-500 mt-1">
+                    Member since {new Date(user.createdAt).toLocaleDateString()}
+                  </div>
+
+                  <div className="mt-5 grid grid-cols-3 gap-3">
+                    {stats.map((stat, i) => (
+                      <div key={i} className="rounded-2xl border border-slate-100 bg-slate-50 p-3 text-center">
+                        <div className="text-xl font-bold text-slate-900">{stat.value}</div>
+                        <div className="text-[11px] leading-tight text-slate-500">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 flex flex-col gap-3">
+                    {isEditing && (
+                      <button
+                        onClick={handleSave}
+                        className="w-full px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors font-medium"
+                      >
+                        Save changes
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        logout();
+                        navigate('/');
+                      }}
+                      className="w-full px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-medium border border-red-100"
+                    >
+                      Log out
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="pt-16 pb-6 px-6">
-              <div className="flex items-center justify-between mb-1">
-                <div>
-                  <h2 className="text-2xl font-bold text-slate-900">{user.firstName} {user.lastName}</h2>
-                  {user.companyName && (
-                    <p className="text-amber-600 font-medium">{user.companyName}</p>
+
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
+                  <div className="text-xs text-slate-500">
+                    {isEditing ? 'Editing enabled' : 'Read-only'}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">First Name</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-slate-900 font-medium">{user.firstName}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">Last Name</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-slate-900 font-medium">{user.lastName}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">Phone</label>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-slate-900 font-medium">{user.phone || '—'}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">Nationality</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={formData.nationality}
+                        onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-slate-900 font-medium">{user.nationality || '—'}</p>
+                    )}
+                  </div>
+
+                  {user.role === 'AGENCY' && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-500 mb-1">Company Name</label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={formData.companyName}
+                          onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                          className="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        />
+                      ) : (
+                        <p className="text-slate-900 font-medium">{user.companyName || '—'}</p>
+                      )}
+                    </div>
                   )}
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-500 mb-1">Email</label>
+                    <p className="text-slate-900 font-medium">{user.email}</p>
+                    <p className="text-xs text-slate-400 mt-1">Email cannot be changed</p>
+                  </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  user.role === 'CLIENT' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
-                }`}>
-                  {user.role}
-                </span>
               </div>
-              <p className="text-slate-500 text-sm">{user.email}</p>
+
+              <AIAssistantCard
+                user={user}
+                stats={stats}
+                requests={user.role === 'CLIENT' ? clientRequests : []}
+                offers={user.role === 'AGENCY' ? agencyOffers : []}
+              />
             </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {stats.map((stat, i) => (
-              <div key={i} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 text-center">
-                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                <p className="text-sm text-slate-500">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Edit Form */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="px-4 py-2 text-sm bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-colors"
-              >
-                {isEditing ? 'Cancel' : 'Edit'}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-500 mb-1">First Name</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  />
-                ) : (
-                  <p className="text-slate-900 font-medium">{user.firstName}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-500 mb-1">Last Name</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  />
-                ) : (
-                  <p className="text-slate-900 font-medium">{user.lastName}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-500 mb-1">Phone</label>
-                {isEditing ? (
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  />
-                ) : (
-                  <p className="text-slate-900 font-medium">{user.phone}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-500 mb-1">Nationality</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={formData.nationality}
-                    onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  />
-                ) : (
-                  <p className="text-slate-900 font-medium">{user.nationality}</p>
-                )}
-              </div>
-              {user.role === 'AGENCY' && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-500 mb-1">Company Name</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={formData.companyName}
-                      onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                    />
-                  ) : (
-                    <p className="text-slate-900 font-medium">{user.companyName}</p>
-                  )}
-                </div>
-              )}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-500 mb-1">Email</label>
-                <p className="text-slate-900 font-medium">{user.email}</p>
-                <p className="text-xs text-slate-400 mt-1">Email cannot be changed</p>
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-500 mb-1">Member Since</label>
-                <p className="text-slate-900 font-medium">{new Date(user.createdAt).toLocaleDateString()}</p>
-              </div>
-            </div>
-
-            {isEditing && (
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
-                >
-                  Save Changes
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Danger Zone */}
-          <div className="mt-8 bg-white rounded-2xl shadow-sm border border-red-100 p-6">
-            <h3 className="text-lg font-semibold text-red-600 mb-2">Danger Zone</h3>
-            <p className="text-sm text-slate-500 mb-4">
-              Logging out will end your current session.
-            </p>
-            <button
-              onClick={() => { logout(); navigate('/'); }}
-              className="px-6 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium"
-            >
-              Log Out
-            </button>
           </div>
         </div>
       </div>
